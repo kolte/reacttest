@@ -10,22 +10,18 @@ export default function Login() {
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [isFormValid, setIsFormValid] = useState(false);
 
-  useEffect(() => {
-    validateForm();
-  }, [email, password]);
-
-  const validateForm = () => {
+  const validateForm = (type: string) => {
     let errors = { email: "", password: "" };
 
-    if (!email) {
+    if (!email && type == "email") {
       errors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/\S+@\S+\.\S+/.test(email) && type == "email") {
       errors.email = "Email is invalid.";
     }
 
-    if (!password) {
+    if (!password && type == "password") {
       errors.password = "Password is required.";
-    } else if (password.length < 8) {
+    } else if (password.length < 8 && type == "password") {
       const strengthChecks = {
         hasUpperCase: false,
         hasLowerCase: false,
@@ -49,7 +45,6 @@ export default function Login() {
     }
 
     setErrors(errors);
-    console.log(errors);
     setIsFormValid(errors.email == "" && errors.password == "");
   };
 
@@ -57,11 +52,9 @@ export default function Login() {
   const handleSubmit = (event: any) => {
     event.preventDefault();
     if (isFormValid) {
-      console.log("Form submitted successfully!");
       localStorage.setItem("token", uuid.v1());
       router.push("/dashboard");
     } else {
-      console.log("Form has errors. Please correct them.");
     }
   };
 
@@ -73,7 +66,7 @@ export default function Login() {
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Sign in to your account
             </h1>
-            <form className="space-y-4 md:space-y-6">
+            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label
                   htmlFor="email"
@@ -87,7 +80,10 @@ export default function Login() {
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="name@company.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    validateForm("email");
+                  }}
                 />
                 {errors.email && (
                   <p className="text-red-500 text-xs">{errors.email}</p>
@@ -106,7 +102,10 @@ export default function Login() {
                   id="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    validateForm("password");
+                  }}
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 />
                 {errors.password && (

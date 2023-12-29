@@ -1,21 +1,26 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Pagination from "./paggination";
 
 export default function Dashboard() {
+  const router = useRouter();
   const [products, setProducts] = useState([{}]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemTotal, setitemTotal] = useState(0);
-  const [isloader, setIsloader] = useState(false);
+  const [isloader, setIsloader] = useState(true);
   const pageSize = 10;
 
-  const onPageChange = (page: number) => {
-    setCurrentPage(page);
-    getData(page, pageSize);
+  const checkAuth = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    }
   };
 
   const getData = async (currentPage: number, pageSize: number) => {
     setIsloader(true);
+    checkAuth();
     try {
       const res = await fetch(
         `https://dummyjson.com/products?skip=${currentPage}&limit=${pageSize}`
@@ -25,9 +30,13 @@ export default function Dashboard() {
       setitemTotal(data.total);
       setIsloader(false);
     } catch (err) {
-      console.log(err);
       setIsloader(false);
     }
+  };
+
+  const onPageChange = (page: number) => {
+    setCurrentPage(page);
+    getData(page, pageSize);
   };
 
   useEffect(() => {
@@ -36,9 +45,9 @@ export default function Dashboard() {
 
   return (
     <>
-      {!isloader && (
+      {isloader && (
         <>
-          <div className="text-center">
+          <div className="loader">
             <div role="status">
               <svg
                 aria-hidden="true"
@@ -61,7 +70,9 @@ export default function Dashboard() {
           </div>
         </>
       )}
-      <div className="flex flex-col">
+      <div
+        className={`flex flex-col ${isloader ? "bg-gray-600 opacity-5" : ""}`}
+      >
         <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
             <h1 className="text-3xl text-gray-900 dark:text-white text-center my-10">
