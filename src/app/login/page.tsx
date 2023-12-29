@@ -1,10 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEventHandler } from "react";
 import { checkAuthentication } from "../../../helper/checkAuthentication";
 import { v4 as uuid } from "uuid";
 
-interface errorType {
+interface fieldType {
   email?: string;
   password?: string;
 }
@@ -13,32 +13,44 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<errorType>({});
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [errors, setErrors] = useState<fieldType>({});
 
-  const validateForm = (type: string) => {
-    const errObj: errorType = {};
-
-    if ((type = "email")) {
-      if (!email) errObj.email = "Email is required.";
-      else if (!/\S+@\S+\.\S+/.test(email) && type == "email") {
+  const validateForm = (
+    type: keyof fieldType,
+    fieldName: string,
+    value: string
+  ) => {
+    const errObj: fieldType = { [type]: "" };
+    if (!value) {
+      errObj[type] = `${fieldName} is required`;
+    }
+    if (value) {
+      if (type == "email" && !/\S+@\S+\.\S+/.test(value)) {
         errObj.email = "Email is invalid.";
-      }
-    } else if (type === "password") {
-      if (!password && type == "password") {
-        errObj.password = "Password is required.";
-      } else if (password.length < 8 && type == "password") {
+      } else if (type == "password" && value.length < 8) {
         errObj.password = "Minimum 8 CharactersPassword is required.";
       }
     }
-    setErrors(errObj);
-    setIsFormValid(!!Object.keys(errObj).length);
+    setErrors((err) => ({ ...err, ...errObj }));
+  };
+
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    const {
+      target: { value, name },
+    } = event;
+    let field: keyof fieldType = "email";
+    if (name === "email") setEmail(value);
+    else if (name === "password") {
+      field = "password";
+      setPassword(value);
+    }
+    validateForm(field, name, value);
   };
 
   // Submit
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    if (isFormValid) {
+    if (!errors.email && !errors.password) {
       localStorage.setItem("token", uuid());
       router.push("/dashboard");
     }
@@ -47,6 +59,8 @@ export default function Login() {
   useEffect(() => {
     if (checkAuthentication()) router.push("/dashboard");
   }, []);
+
+  console.log(errors);
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
@@ -70,10 +84,7 @@ export default function Login() {
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="name@company.com"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    validateForm("email");
-                  }}
+                  onChange={handleChange}
                 />
                 {errors.email && (
                   <p className="text-red-500 text-xs">{errors.email}</p>
@@ -92,35 +103,12 @@ export default function Login() {
                   id="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    validateForm("password");
-                  }}
+                  onChange={handleChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 />
                 {errors.password && (
                   <p className="text-red-500 text-xs">{errors.password}</p>
                 )}
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="remember"
-                      aria-describedby="remember"
-                      type="checkbox"
-                      className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
-                    />
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <label
-                      htmlFor="remember"
-                      className="text-gray-500 dark:text-gray-300"
-                    >
-                      Remember me
-                    </label>
-                  </div>
-                </div>
               </div>
               <button
                 type="submit"
