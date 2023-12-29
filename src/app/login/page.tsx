@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import React, { useState, useEffect, ChangeEventHandler } from "react";
 import { checkAuthentication } from "../../../helper/checkAuthentication";
 import { v4 as uuid } from "uuid";
+import Input from "@/components/Input";
 
 interface fieldType {
   email?: string;
@@ -11,8 +12,8 @@ interface fieldType {
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [errors, setErrors] = useState<fieldType>({});
 
   const validateForm = (
@@ -36,11 +37,11 @@ export default function Login() {
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     const {
-      target: { value, name },
+      target: { value, name, type },
     } = event;
     let field: keyof fieldType = "email";
-    if (name === "email") setEmail(value);
-    else if (name === "password") {
+    if (type === "email") setEmail(value);
+    else if (type === "password") {
       field = "password";
       setPassword(value);
     }
@@ -69,45 +70,25 @@ export default function Login() {
               Sign in to your account
             </h1>
             <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Your email
-                </label>
-                <input
-                  name="email"
-                  id="email"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={handleChange}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-xs">{errors.email}</p>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  id="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={handleChange}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
-                {errors.password && (
-                  <p className="text-red-500 text-xs">{errors.password}</p>
-                )}
-              </div>
+              <Input
+                label="Your Email"
+                id="email"
+                type="email"
+                name="Email"
+                value={email}
+                error={errors.email}
+                handleChange={handleChange}
+                placeholder="name@company.com"
+              />
+              <Input
+                id="password"
+                type="password"
+                name="Password"
+                value={password}
+                error={errors.password}
+                handleChange={handleChange}
+                placeholder="••••••••"
+              />
               <button
                 type="submit"
                 className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"

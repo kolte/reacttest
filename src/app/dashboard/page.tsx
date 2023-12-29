@@ -42,6 +42,9 @@ export default function Dashboard() {
       setProducts(data.products);
       setItemTotal(data.total);
       setShowLoader(false);
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
     } catch (err) {
       setShowLoader(false);
     }
