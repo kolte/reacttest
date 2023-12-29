@@ -19,8 +19,9 @@ const PageNumber = ({ page, onPageChange, currentPage }: pageNumberProps) => {
     <li
       key={page}
       className={`flex justify-center items-center w-8 h-8 border border-solid border-gray-200 rounded-lg cursor-pointer ${activeClass}`}
+      onClick={() => onPageChange(page)}
     >
-      <a className="cursor-pointer" onClick={() => onPageChange(page)}>
+      <a className="cursor-pointer" >
         {page}
       </a>
     </li>
