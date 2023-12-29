@@ -1,62 +1,52 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-var uuid = require("uuid");
+import { checkAuthentication } from "../../../helper/checkAuthentication";
+import { v4 as uuid } from "uuid";
+
+interface errorType {
+  email?: string;
+  password?: string;
+}
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState<errorType>({});
   const [isFormValid, setIsFormValid] = useState(false);
 
   const validateForm = (type: string) => {
-    let errors = { email: "", password: "" };
+    const errObj: errorType = {};
 
-    if (!email && type == "email") {
-      errors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(email) && type == "email") {
-      errors.email = "Email is invalid.";
+    if ((type = "email")) {
+      if (!email) errObj.email = "Email is required.";
+      else if (!/\S+@\S+\.\S+/.test(email) && type == "email") {
+        errObj.email = "Email is invalid.";
+      }
+    } else if (type === "password") {
+      if (!password && type == "password") {
+        errObj.password = "Password is required.";
+      } else if (password.length < 8 && type == "password") {
+        errObj.password = "Minimum 8 CharactersPassword is required.";
+      }
     }
-
-    if (!password && type == "password") {
-      errors.password = "Password is required.";
-    } else if (password.length < 8 && type == "password") {
-      const strengthChecks = {
-        hasUpperCase: false,
-        hasLowerCase: false,
-        hasDigit: false,
-        hasSpecialChar: false,
-      };
-
-      strengthChecks.hasUpperCase = /[A-Z]+/.test(password);
-      strengthChecks.hasLowerCase = /[a-z]+/.test(password);
-      strengthChecks.hasDigit = /[0-9]+/.test(password);
-      strengthChecks.hasSpecialChar = /[^A-Za-z0-9]+/.test(password);
-
-      let verifiedList = Object.values(strengthChecks).filter((value) => value);
-      let strength =
-        verifiedList.length == 4
-          ? "Strong"
-          : verifiedList.length >= 2
-          ? "Medium"
-          : "Weak";
-      errors.password = `Password is ${strength}.`;
-    }
-
-    setErrors(errors);
-    setIsFormValid(errors.email == "" && errors.password == "");
+    setErrors(errObj);
+    setIsFormValid(!!Object.keys(errObj).length);
   };
 
   // Submit
   const handleSubmit = (event: any) => {
     event.preventDefault();
     if (isFormValid) {
-      localStorage.setItem("token", uuid.v1());
+      localStorage.setItem("token", uuid());
       router.push("/dashboard");
-    } else {
     }
   };
+
+  useEffect(() => {
+    if (checkAuthentication()) router.push("/dashboard");
+  }, []);
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
