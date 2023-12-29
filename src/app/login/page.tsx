@@ -1,15 +1,15 @@
 "use client";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-// const TokenGenerator = require('uuid-token-generator');
-
-
+var uuid = require("uuid");
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [isFormValid, setIsFormValid] = useState(false);
-  // const tokgen = new TokenGenerator(); 
+
   useEffect(() => {
     validateForm();
   }, [email, password]);
@@ -49,14 +49,17 @@ export default function Login() {
     }
 
     setErrors(errors);
-    setIsFormValid(Object.keys(errors).length === 0);
+    console.log(errors);
+    setIsFormValid(errors.email == "" && errors.password == "");
   };
+
   // Submit
-  const handleSubmit = () => {
+  const handleSubmit = (event: any) => {
+    event.preventDefault();
     if (isFormValid) {
       console.log("Form submitted successfully!");
-      // tokgen.generate();
-      // console.log(tokgen.generate())
+      localStorage.setItem("token", uuid.v1());
+      router.push("/dashboard");
     } else {
       console.log("Form has errors. Please correct them.");
     }
@@ -65,13 +68,12 @@ export default function Login() {
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-      
         <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Sign in to your account
             </h1>
-            <form className="space-y-4 md:space-y-6" action="#">
+            <form className="space-y-4 md:space-y-6">
               <div>
                 <label
                   htmlFor="email"
@@ -130,7 +132,6 @@ export default function Login() {
                     </label>
                   </div>
                 </div>
-                
               </div>
               <button
                 type="submit"
@@ -139,7 +140,6 @@ export default function Login() {
               >
                 Sign in
               </button>
-              
             </form>
           </div>
         </div>
